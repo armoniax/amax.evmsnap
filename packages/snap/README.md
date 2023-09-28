@@ -19,32 +19,7 @@ if (!installed) {
     });
 }
 
-// Initialize the Snap with default chains
-await ethereum.request({
-    method: 'wallet_invokeSnap',
-    params: {
-        snapId: 'npm:@amax/amaxsnap',
-        request: {
-            method: 'initialize',
-        },
-    },
-});
 ```
-
-## Check If Initialized
-```javascript
-// Boolean is returned
-const initialized = await ethereum.request({
-    method: 'wallet_invokeSnap',
-    params: {
-        snapId: 'npm:@amax/amaxsnap',
-        request: {
-            method: 'initialized',
-        },
-    },
-});
-```
-
 ## Get Accounts 
 ```javascript
 await window.ethereum.request({
