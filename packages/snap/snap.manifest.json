@@ -1,0 +1,34 @@
+{
+  "version": "0.0.1",
+  "description": "Manage your account, tokens and NFTs and access DAPPs (xChain, Swap, TrueDEX etc.) of Armonia Meta Chain from your MetaMask EVM wallet.",
+  "proposedName": "AMAX Wallet",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/armoniax/amax.evmsnap"
+  },
+  "source": {
+    "shasum": "yaQxqU2riFrgopGx66YyAYecxQP9vy3P1+3NPWtRekw=",
+    "location": {
+      "npm": {
+        "filePath": "dist/bundle.js",
+        "iconPath": "images/icon.svg",
+        "packageName": "@amax/amaxsnap",
+        "registry": "https://registry.npmjs.org/"
+      }
+    }
+  },
+  "initialPermissions": {
+    "snap_dialog": {},
+    "endowment:rpc": {
+      "dapps": true,
+      "snaps": false
+    },
+    "endowment:network-access": {},
+    "snap_getBip44Entropy": [
+      {
+        "coinType": 1048576
+      }
+    ]
+  },
+  "manifestVersion": "0.1"
+}
