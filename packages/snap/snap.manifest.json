@@ -4,10 +4,10 @@
   "proposedName": "AMAX Up",
   "repository": {
     "type": "git",
-    "url": "https://github.com/armoniax/amax.evmsnap"
+    "url": "https://github.com/armoniax/amaxup.evmsnap"
   },
   "source": {
-    "shasum": "3e67u8UXp54DlA+sRoKWR8ydOn8NSkMBlrbC4/m4KvA=",
+    "shasum": "3ouZua3JoXHCvLi4wS/jwXPjxRpPSskERUK1ke1zOsI=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",

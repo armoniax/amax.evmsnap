@@ -5,7 +5,7 @@
   "description": "Manage your account, tokens and NFTs and access DAPPs (xChain, Swap, TrueDEX etc.) of Armonia Meta Chain from your MetaMask EVM wallet.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/armoniax/amax.evmsnap"
+    "url": "https://github.com/armoniax/amaxup.evmsnap"
   },
   "license": "(MIT-0 OR Apache-2.0)",
   "main": "src/index.ts",
