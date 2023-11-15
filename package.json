@@ -49,6 +49,7 @@
     "node": ">=16.0.0"
   },
   "dependencies": {
-    "@metamask/detect-provider": "^2.0.0"
+    "@metamask/detect-provider": "^2.0.0",
+    "antd": "^5.11.1"
   }
 }

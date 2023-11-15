@@ -1,5 +1,7 @@
-import { useContext } from 'react';
+import { useContext, useRef, useState } from 'react';
 import styled from 'styled-components';
+import { notification, Spin, Space, Alert } from 'antd';
+import { GetAccountResult } from '@amax/amaxjs-v2/dist/eosjs-rpc-interfaces';
 import { MetamaskActions, MetaMaskContext } from '../hooks';
 import {
   connectSnap,
@@ -17,7 +19,7 @@ import {
   Button,
 } from '../components';
 import { defaultSnapOrigin } from '../config';
-import { getClient, getRpc } from '../utils/client';
+import { getClient, getRpc, network } from '../utils/client';
 
 const Container = styled.div`
   display: flex;
@@ -105,11 +107,16 @@ const ErrorMessage = styled.div`
 
 const Index = () => {
   const [state, dispatch] = useContext(MetaMaskContext);
-
+  const [api, contextHolder] = notification.useNotification();
   const isMetaMaskReady = isLocalSnap(defaultSnapOrigin)
     ? state.isFlask
     : state.snapsDetected;
-
+  const [loading, setLoading] = useState(false);
+  const [getAccountLoading, setGetAccountLoading] = useState(false);
+  const [accountInfo, setAccountInfo] = useState<GetAccountResult>();
+  const [publicKeys, setPublicKeys] = useState<{ [path: number]: string }>();
+  const [currentPath, setCurrentPath] = useState<number>();
+  const [result, setResult] = useState<any>();
   const handleConnectClick = async () => {
     try {
       await connectSnap();
@@ -127,6 +134,7 @@ const Index = () => {
 
   const getAccounts = async () => {
     try {
+      setLoading(true);
       const accounts = await window.ethereum.request({
         method: 'wallet_invokeSnap',
         params: {
@@ -137,57 +145,73 @@ const Index = () => {
           },
         },
       });
-      dispatch({
-        type: MetamaskActions.UpdateState,
-        payload: { publicKeys: accounts },
-      });
+      setPublicKeys(accounts as { [path: number]: string });
     } catch (e) {
       console.error(e);
-      dispatch({ type: MetamaskActions.SetError, payload: e });
+    } finally {
+      setLoading(false);
     }
   };
 
   const getAccount = async (path: number, publicKey: string) => {
-    const { rpc } = getRpc();
-    const { accounts } = await rpc.get_accounts_by_authorizers([], [publicKey]);
-    const account = accounts[0];
-    if (account) {
-      const info = await rpc.get_account(account.account_name);
-      dispatch({
-        type: MetamaskActions.UpdateState,
-        payload: { account: info, path },
-      });
-    } else {
-      dispatch({
-        type: MetamaskActions.UpdateState,
-        payload: { account: undefined, path: undefined },
-      });
+    try {
+      setGetAccountLoading(true);
+      const { rpc } = getRpc();
+      setCurrentPath(path);
+      const { accounts } = await rpc.get_accounts_by_authorizers(
+        [],
+        [publicKey],
+      );
+      const account = accounts[0];
+      if (account) {
+        const info = await rpc.get_account(account.account_name);
+        setAccountInfo(info);
+        api.success({
+          message: `帐号信息`,
+          description: <pre>{JSON.stringify(info, null, 4)}</pre>,
+        });
+      } else {
+        setAccountInfo(undefined);
+        api.error({
+          message: `Error`,
+          description: '帐号未激活',
+        });
+      }
+    } catch (e) {
+      throw e;
+    } finally {
+      setGetAccountLoading(false);
     }
-    console.log(accounts);
   };
 
   const transfer = async () => {
-    const { rpcUrl } = getRpc();
+    if (!accountInfo) {
+      return api.error({
+        message: `Error`,
+        description: '帐号未激活',
+      });
+    }
+
     const actions = [
       {
         account: 'amax.token',
         name: 'transfer',
         data: {
-          from: 'testuser1121',
+          from: accountInfo?.account_name,
           to: 'testuser2222',
           quantity: '0.00100000 AMAX',
           memo: '',
         },
         authorization: [
           {
-            actor: 'testuser1121',
+            actor: accountInfo?.account_name,
             permission: 'active',
           },
         ],
       },
     ];
 
-    const { api } = await getClient();
+    // const { api } = await getClient();
     // const transaction = await api.transact(
     //   {
     //     actions,
@@ -210,8 +234,8 @@ const Index = () => {
           method: 'signTransaction',
           params: {
             actions,
-            network: rpcUrl,
-            path: state.path,
+            network,
+            path: currentPath,
           },
         },
       },
@@ -221,16 +245,19 @@ const Index = () => {
     // sign.serializedTransaction = Uint8Array.from(
     //   Object.values(sign.serializedTransaction),
     // );
-    dispatch({
-      type: MetamaskActions.UpdateState,
-      payload: { result },
-    });
+    setResult(result);
     console.log('result', result);
     // const a = await api.pushSignedTransaction(sign);
     // console.log(a);
   };
 
   const signMessage = async () => {
+    if (!accountInfo) {
+      return api.error({
+        message: `Error`,
+        description: '帐号未激活',
+      });
+    }
     const sign: any = await window.ethereum.request({
       method: 'wallet_invokeSnap',
       params: {
@@ -239,15 +266,16 @@ const Index = () => {
           method: 'signMessage',
           params: {
             message: '签名内容，这就是一个字符串',
-            path: state.path,
+            path: currentPath,
           },
         },
       },
     });
-    console.log('sign', sign);
+    setResult(sign);
   };
   return (
     <Container>
+      {contextHolder}
       <Heading>
         Welcome to <Span>template-snap</Span>
       </Heading>
@@ -303,55 +331,91 @@ const Index = () => {
             disabled={!state.installedSnap}
           />
         )}
-        <Card
-          content={{
-            title: '获取帐户',
-            description: '根据path获取公钥',
-            button: (
-              <Button onClick={getAccounts} disabled={!state.installedSnap}>
-                getAccounts
-              </Button>
-            ),
-          }}
-          disabled={!state.installedSnap}
-          fullWidth={
-            isMetaMaskReady &&
-            Boolean(state.installedSnap) &&
-            !shouldDisplayReconnectButton(state.installedSnap)
-          }
-        />
-        <Notice>
-          <div>
-            {state.publicKeys &&
-              Object.entries(state.publicKeys).map(([path, publicKey]) => (
-                <div
-                  key={publicKey}
-                  style={{ margin: '10px', cursor: 'pointer' }}
-                  onClick={() => getAccount(path, publicKey)}
-                >
-                  {path} : {publicKey}
+        <Spin spinning={loading}>
+          <Card
+            content={{
+              title: '获取帐户',
+              description: '根据path获取公钥',
+              button: (
+                <Button onClick={getAccounts} disabled={!state.installedSnap}>
+                  getAccounts
+                </Button>
+              ),
+            }}
+            disabled={!state.installedSnap}
+            fullWidth={
+              isMetaMaskReady &&
+              Boolean(state.installedSnap) &&
+              !shouldDisplayReconnectButton(state.installedSnap)
+            }
+          />
+        </Spin>
+        {publicKeys ? (
+          <Spin spinning={getAccountLoading}>
+            <Notice>
+              {publicKeys ? (
+                <div>
+                  <div style={{ margin: '20px 0' }}>选择一个publicKey</div>
+                  {Object.entries(publicKeys).map(([path, publicKey]) => (
+                    <div
+                      key={publicKey}
+                      style={{
+                        margin: '10px',
+                        cursor: 'pointer',
+                        color:
+                          currentPath === Number(path) ? '#FFF' : '#24272A',
+                        background:
+                          currentPath === Number(path) ? '#1677ff' : '#FFF',
+                        border: '1px solid #CCC',
+                        padding: '10px',
+                        borderRadius: '6px',
+                      }}
+                      onClick={() => getAccount(Number(path), publicKey)}
+                    >
+                      <div>路径：{path}</div>
+                      <div>公钥：{publicKey}</div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-          </div>
-        </Notice>
-        <Notice>
-          <Button onClick={transfer} style={{ float: 'left' }}>
-            Transfer
-          </Button>
-          <Button onClick={signMessage}>Sign Message</Button>
-          {state.result ? (
-            <pre>
-              <pre>{JSON.stringify(state.result, null, 4)}</pre>
-            </pre>
-          ) : null}
-          <pre>
-            {state.account ? (
-              JSON.stringify(state.account, null, 4)
-            ) : (
-              <p style={{ color: 'red' }}>未激活</p>
-            )}
-          </pre>
-        </Notice>
+              ) : null}
+            </Notice>
+          </Spin>
+        ) : null}
+        {currentPath !== undefined && accountInfo ? (
+          <Notice>
+            <Space direction="vertical">
+              <Alert
+                message={
+                  <div>
+                    <div>当前选择的帐号: {accountInfo.account_name}</div>
+                    <div>当前广播的网络: {network}</div>
+                  </div>
+                }
+                type="success"
+              />
+              <Space>
+                <Button onClick={transfer} style={{ float: 'left' }}>
+                  Transfer
+                </Button>
+                <Button onClick={signMessage}>Sign Message</Button>
+              </Space>
+              <Alert
+                message="Transfer: 用当前选中的帐号向testuser2222划转0.00100000 AMAX"
+                type="info"
+              />
+              <Alert
+                message="Sign Message: 签名[签名内容，这就是一个字符串]这个字符串"
+                type="info"
+              />
+            </Space>
+          </Notice>
+        ) : null}
+
+        {result && currentPath !== undefined && accountInfo ? (
+          <Notice>
+            <pre>{JSON.stringify(result, null, 4)}</pre>
+          </Notice>
+        ) : null}
         <Notice>
           <p>
             Please note that the <b>snap.manifest.json</b> and{' '}

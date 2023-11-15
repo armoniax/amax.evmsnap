@@ -1,10 +1,10 @@
 import { Api, JsonRpc } from '@amax/amaxjs-v2';
 import { JsSignatureProvider } from '@amax/amaxjs-v2/dist/eosjs-jssig';
 
+export const network = 'https://chain.amaxtest.com';
 export function getRpc() {
-  const rpc = 'https://test-chain.ambt.art';
-  const api = new JsonRpc(rpc, { fetch });
-  return { rpc: api, rpcUrl: rpc };
+  const api = new JsonRpc(network, { fetch });
+  return { rpc: api, rpcUrl: network };
 }
 
 export async function getClient(): Promise<{
