@@ -427,7 +427,7 @@ const Index = () => {
             </Space>
           </Notice>
         ) : null}
-        <Button onClick={signMessage}>Sign Message</Button>
+
         {result && currentPath !== undefined && accountInfo ? (
           <Notice>
             <pre>{JSON.stringify(result, null, 4)}</pre>
