@@ -209,6 +209,22 @@ const Index = () => {
           },
         ],
       },
+      {
+        account: 'amax.token',
+        name: 'transfer',
+        data: {
+          from: accountInfo?.account_name,
+          to: 'testuser2222',
+          quantity: '0.00100000 AMAX',
+          memo: '',
+        },
+        authorization: [
+          {
+            actor: accountInfo?.account_name,
+            permission: 'active',
+          },
+        ],
+      },
     ];
 
     // const { api } = await getClient();
@@ -226,6 +242,7 @@ const Index = () => {
 
     // console.log('transaction', transaction, api.cachedAbis);
 
+    // eslint-disable-next-line @typescript-eslint/no-shadow
     const result: any = await window.ethereum.request({
       method: 'wallet_invokeSnap',
       params: {
@@ -246,7 +263,7 @@ const Index = () => {
     //   Object.values(sign.serializedTransaction),
     // );
     setResult(result);
-    console.log('result', result);
+    // console.log('result', result);
     // const a = await api.pushSignedTransaction(sign);
     // console.log(a);
   };
@@ -265,7 +282,7 @@ const Index = () => {
         request: {
           method: 'signMessage',
           params: {
-            message: '签名内容，这就是一个字符串',
+            message: 'displayed message! [hidden messages]() extra message',
             path: currentPath,
           },
         },
@@ -410,7 +427,7 @@ const Index = () => {
             </Space>
           </Notice>
         ) : null}
-
+        <Button onClick={signMessage}>Sign Message</Button>
         {result && currentPath !== undefined && accountInfo ? (
           <Notice>
             <pre>{JSON.stringify(result, null, 4)}</pre>

@@ -1,4 +1,6 @@
 import { OnRpcRequestHandler } from '@metamask/snaps-types';
+import { heading, panel } from '@metamask/snaps-ui';
+import { actionsUI } from './utils/actionsUI';
 import getPublicKeys from './wallet/getPublicKeys';
 import confirm from './utils/confirm';
 import { signMessage, signTransaction } from './wallet/sign';
@@ -21,13 +23,14 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
     case 'getAccounts': {
       if (
         await confirm({
-          title: '获取帐户',
-          texts: [`${origin}想获取帐户`, '是否允许？'],
+          title: 'Get public key',
+          texts: [
+            `**${origin}** wants to get the wallet public key, is it allowed?`,
+          ],
         })
       ) {
         const { paths } = request.params as any;
         const publicKeys = await getPublicKeys(paths);
-        console.log('publicKeys', publicKeys);
         return publicKeys;
       }
       throw new Error('User Canceled!');
@@ -36,9 +39,15 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
     case 'signTransaction': {
       const { actions, network, path, transactConfig } = request.params as any;
       if (
-        await confirm({
-          title: '交易签名',
-          texts: [JSON.stringify(actions, null, 4)],
+        await snap.request({
+          method: 'snap_dialog',
+          params: {
+            type: 'confirmation',
+            content: panel([
+              heading('Transaction Signature'),
+              ...actionsUI(actions),
+            ]),
+          },
         })
       ) {
         return await signTransaction(
@@ -55,8 +64,12 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       const { message, path } = request.params as any;
       if (
         await confirm({
-          title: '签名',
-          texts: [message],
+          title: 'Signature content',
+          texts: [
+            { value: message, markdown: false },
+            'divider',
+            '_This action will not be used to submit transactions, but to confirm that you have ownership of the current account._',
+          ],
         })
       ) {
         return await signMessage(message, Number(path));

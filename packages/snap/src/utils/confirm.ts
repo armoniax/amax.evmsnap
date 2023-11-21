@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable jsdoc/match-description */
-import { heading, panel, text } from '@metamask/snaps-ui';
+import { NodeType, divider, heading, panel, text } from '@metamask/snaps-ui';
 
 /**
  * confirm
@@ -11,9 +12,25 @@ import { heading, panel, text } from '@metamask/snaps-ui';
  */
 export default async function confirm(settings: {
   title?: string;
-  texts: string[];
+  texts: (
+    | Omit<
+        {
+          value: string;
+          type: NodeType.Text;
+          markdown?: boolean | undefined;
+        },
+        'type'
+      >
+    | string
+  )[];
 }): Promise<string | boolean | null> {
-  const arr: any[] = settings.texts.map((str) => text(str));
+  const arr: any[] = settings.texts.map((value) => {
+    if (value === 'divider') {
+      return divider();
+    }
+    // @ts-ignore
+    return text(value);
+  });
   if (settings.title) {
     arr.unshift(heading(settings.title));
   }
