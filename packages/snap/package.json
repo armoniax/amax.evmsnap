@@ -1,6 +1,6 @@
 {
   "name": "@amax/amaxsnap",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Manage your account, tokens and NFTs and access DAPPs (xChain, Swap, TrueDEX etc.) of Armonia Meta Chain from your MetaMask EVM wallet.",
   "repository": {
     "type": "git",

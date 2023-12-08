@@ -290,6 +290,112 @@ const Index = () => {
     });
     setResult(sign);
   };
+
+  async function buyram() {
+    if (!accountInfo) {
+      return api.error({
+        message: `Error`,
+        description: '帐号未激活',
+      });
+    }
+    const actions = [
+      {
+        account: 'amax',
+        name: 'buyram',
+        data: {
+          payer: accountInfo?.account_name,
+          receiver: 'testuser2222',
+          quant: '0.00200000 AMAX',
+          memo: '123',
+        },
+        authorization: [
+          {
+            actor: accountInfo?.account_name,
+            permission: 'active',
+          },
+        ],
+      },
+    ];
+
+    const result: any = await window.ethereum.request({
+      method: 'wallet_invokeSnap',
+      params: {
+        snapId: defaultSnapOrigin,
+        request: {
+          method: 'signTransaction',
+          params: {
+            actions,
+            network,
+            path: currentPath,
+          },
+        },
+      },
+    });
+    setResult(result);
+  }
+
+  async function updateauth() {
+    if (!accountInfo) {
+      return api.error({
+        message: `Error`,
+        description: '帐号未激活',
+      });
+    }
+    const actions = [
+      {
+        account: 'amax',
+        name: 'updateauth',
+        authorization: [
+          {
+            actor: accountInfo?.account_name,
+            permission: 'owner',
+          },
+        ],
+        data: {
+          account: accountInfo?.account_name,
+          permission: 'owner',
+          auth: {
+            threshold: 1,
+            keys: [
+              {
+                key: 'AM7qnXAVEvT4CMAMsU6weZfzHbMDud5b517US2guZiSdHK23pSrU',
+                weight: 1,
+              },
+              {
+                key: 'AM8e42QwnzeNdFnwnrc3Fxh3TUaH31YwXVtUAg9wAkedmbqV9vYn',
+                weight: 1,
+              },
+            ],
+            accounts: [
+              {
+                permission: { actor: 'frank12345oo', permission: 'owner' },
+                weight: 1,
+              },
+            ],
+            waits: [],
+          },
+          parent: '',
+        },
+      },
+    ];
+
+    const result: any = await window.ethereum.request({
+      method: 'wallet_invokeSnap',
+      params: {
+        snapId: defaultSnapOrigin,
+        request: {
+          method: 'signTransaction',
+          params: {
+            actions,
+            network,
+            path: currentPath,
+          },
+        },
+      },
+    });
+    setResult(result);
+  }
+
   return (
     <Container>
       {contextHolder}
@@ -414,6 +520,13 @@ const Index = () => {
                 <Button onClick={transfer} style={{ float: 'left' }}>
                   Transfer
                 </Button>
+                <Button onClick={buyram} style={{ float: 'left' }}>
+                  buyram
+                </Button>
+                <Button onClick={updateauth} style={{ float: 'left' }}>
+                  updateauth
+                </Button>
+
                 <Button onClick={signMessage}>Sign Message</Button>
               </Space>
               <Alert

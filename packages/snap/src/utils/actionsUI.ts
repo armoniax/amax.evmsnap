@@ -16,28 +16,47 @@ export const isArr = (str: any): boolean =>
  * action object to action ui;
  *
  * @param actions - action array
+ * @param locale - i18n
  * @returns text array
  */
-export function actionsUI(actions: Action[]): any[] {
+export function actionsUI(
+  actions: Action[],
+  locale: (key: string) => string,
+): any[] {
   const arr: any[] = [];
+  const isUpdateAuth =
+    actions.findIndex((item) => item.name === 'updateauth') > -1;
+  if (isUpdateAuth) {
+    arr.push(
+      text({
+        value: `**${locale('updateAuthTips')}**`,
+        markdown: true,
+      }),
+    );
+    arr.push(divider());
+  }
   for (const action of actions) {
     for (const key in action) {
       if (key === 'data') {
-        for (const key1 in action[key]) {
-          const item = action[key][key1];
-          arr.push(
-            text({
-              value: `${key1}: ${
-                isObj(item) ? JSON.stringify(action[key][key1]) : item
-              }`,
-              markdown: false,
-            }),
-          );
-        }
+        arr.push(
+          text({
+            value: `${key}: ${
+              isObj(action[key]) ? JSON.stringify(action[key]) : action[key]
+            }`,
+            markdown: false,
+          }),
+        );
       } else if (key === 'authorization') {
         arr.push(
           text({
             value: `${key}: ${JSON.stringify(action[key])}`,
+            markdown: false,
+          }),
+        );
+      } else {
+        arr.push(
+          text({
+            value: `${key}: ${(action as { [key: string]: any })[key]}`,
             markdown: false,
           }),
         );

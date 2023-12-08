@@ -11,7 +11,7 @@ import getAmaxKeyPair from './getAmaxKeyPair';
  */
 export default async function getPublicKeys(
   paths?: number[],
-): Promise<{ [key: number]: string }> {
+): Promise<PublicKeys> {
   const node = await snap.request({
     method: 'snap_getBip44Entropy',
     params: {

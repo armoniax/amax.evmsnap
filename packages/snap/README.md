@@ -13,7 +13,7 @@ if (!installed) {
         method: 'wallet_requestSnaps',
         params: {
             'npm:@amax/amaxsnap': {
-            version: '^0.1.0',
+            version: '^0.0.4', // please select last version
             },
         },
     });
@@ -27,7 +27,7 @@ await window.ethereum.request({
     params: {
         snapId: 'npm:@amax/amaxsnap',
         request: {
-            method: 'signTransaction',
+            method: 'getAccounts',
             params: {
                 paths: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 100] // get accounts by derive path 
             }
@@ -43,7 +43,7 @@ await window.ethereum.request({
     params: {
         snapId: 'npm:@amax/amaxsnap',
         request: {
-            method: 'getAccounts',
+            method: 'signTransaction',
             params: {
               actions: [], // action array
               network: '', // network
