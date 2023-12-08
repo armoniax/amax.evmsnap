@@ -16,7 +16,7 @@ Additional information can be found [here](https://docs.metamask.io/guide/snaps.
 
 ### `@amax/amaxsnap` Integration
 If you would like to integrate `@amax/amaxsnap` into your dapp, you can make use of our npm. Refer to the following document here. 
-[here](hhttps://github.com/armoniax/amaxup.evmsnap/tree/main/packages/snap).
+[here](https://github.com/armoniax/amaxup.evmsnap/tree/main/packages/snap).
 
 ##
 

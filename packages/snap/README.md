@@ -13,7 +13,7 @@ if (!installed) {
         method: 'wallet_requestSnaps',
         params: {
             'npm:@amax/amaxsnap': {
-            version: '^0.0.4', // please select last version
+            version: '^0.0.5', // please select last version
             },
         },
     });
