@@ -32,5 +32,5 @@ yarn install && yarn start
 
 [Audited by certik](https://skynet.certik.com/projects/armonia-meta-chain)
 
-[Audited by SAYFER]('#')
+[Audited by SAYFER](https://sayfer.io/audits/metamask-snap-audit-report-for-amax)
 
